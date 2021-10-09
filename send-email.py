@@ -1,15 +1,32 @@
 import base64
 import os
+import json
 from email.mime.text import MIMEText
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from googleapiclient.errors import HttpError
 
 sender = "***REMOVED***"
 to = "***REMOVED***"
-subject = "Nuevo tweet"
-SCOPES = ['https://www.googleapis.com/auth/gmail.sendemail']
+subject = "Nuevos tweets de la Facultad de Ciencias de la Información"
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+
+def create_message_text(json_object):
+  json_dict = json.loads(json_object)
+
+  if "data" in json_dict: # Solo se genera el texto del mensaje si existen tweets
+    texto = "Se han encontrado los siguientes tweets (de más nuevo a más antiguo):\n\n"
+    for tweet in json_dict["data"]:
+      texto += tweet["text"] + "\n"
+      # Se utiliza el nombre de usuario twitter porque no importa cuál se ponga. Referencia: https://blog.twitter.com/developer/en_us/topics/tips/2020/getting-to-the-canonical-url-for-a-tweet
+      texto += f'Enlace: https://twitter.com/twitter/status/{tweet["id"]}\n' 
+      texto += '-------------------------------------------------------------\n'
+    return texto
+  else:
+    return None
+
 
 def connect_to_api():
     creds = None
@@ -30,7 +47,7 @@ def connect_to_api():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('gmail', 'v1', credentials=creds)
+    return build('gmail', 'v1', credentials=creds)
 
 def create_message(message_text):
   """Create a message for an email.
@@ -48,7 +65,7 @@ def create_message(message_text):
   message['to'] = to
   message['from'] = sender
   message['subject'] = subject
-  return {'raw': base64.urlsafe_b64encode(message.as_string())}
+  return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 def send_message(service, user_id, message):
   """Send an email message.
@@ -65,8 +82,17 @@ def send_message(service, user_id, message):
   try:
     message = (service.users().messages().send(userId=user_id, body=message)
                .execute())
-    print 'Message Id: %s' % message['id']
+    print(f'Message Id: {message["id"]}')
     return message
-  except errors.HttpError, error:
-    print 'An error occurred: %s' % error
+  except HttpError as error:
+    print(f'An error occurred: {error}')
 
+def send_email(json):  
+  message_text = create_message_text(json)
+  if message_text is not None:
+    serv = connect_to_api()
+    msj = create_message(message_text)
+    send_message(serv, "me", msj)
+
+if __name__ == "__main__":
+  send_email()
