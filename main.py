@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from twitter_search import twitter_search
 from send_email import send_email
 

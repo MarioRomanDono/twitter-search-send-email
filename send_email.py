@@ -8,9 +8,9 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 
-sender = os.environ.get("FROM_EMAIL")
-to = os.environ.get("TO_EMAIL")
-subject = os.environ.get("SUBJECT_EMAIL")
+sender = os.getenv("FROM_EMAIL")
+to = os.getenv("TO_EMAIL")
+subject = os.getenv("SUBJECT_EMAIL")
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 def create_message_text(json_object):
