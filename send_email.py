@@ -12,6 +12,8 @@ sender = os.getenv("FROM_EMAIL")
 to = os.getenv("TO_EMAIL")
 subject = os.getenv("SUBJECT_EMAIL")
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+creds_var = json.loads(base64.b64decode(os.getenv("GMAIL_CREDENTIALS")))
+token_var = json.loads(base64.b64decode(os.getenv("GMAIL_TOKEN")))
 
 def create_message_text(json_object):
   json_dict = json.loads(json_object)
@@ -33,15 +35,22 @@ def connect_to_api():
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if (os.path.exists("token.json")):
+      creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    elif (os.getenv("GMAIL_TOKEN")):
+      creds = Credentials.from_authorized_user_info(token_var, SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            flow = None
+            if (os.path.exists("credentials.json")):
+              flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            elif (os.getenv("GMAIL_TOKEN")):
+              flow = InstalledAppFlow.from_client_config(creds_var, SCOPES)
+            else:
+              raise Exception("No credentials file or env variable!")
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
