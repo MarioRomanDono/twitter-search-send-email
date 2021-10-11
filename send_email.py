@@ -26,9 +26,10 @@ from googleapiclient.errors import HttpError
 sender = os.getenv("FROM_EMAIL")
 to = os.getenv("TO_EMAIL")
 subject = os.getenv("SUBJECT_EMAIL")
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 creds_var = json.loads(base64.b64decode(os.getenv("GMAIL_CREDENTIALS")))
 token_var = json.loads(base64.b64decode(os.getenv("GMAIL_TOKEN")))
+
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 def create_message_text(json_object):
   json_dict = json.loads(json_object)
@@ -47,14 +48,10 @@ def create_message_text(json_object):
 
 def connect_to_api():
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
     if (os.path.exists("token.json")):
       creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     elif (os.getenv("GMAIL_TOKEN")):
       creds = Credentials.from_authorized_user_info(token_var, SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -67,24 +64,12 @@ def connect_to_api():
             else:
               raise Exception("No credentials file or env variable!")
             creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
     return build('gmail', 'v1', credentials=creds)
 
 def create_message(message_text):
-  """Create a message for an email.
-
-  Args:
-    sender: Email address of the sender.
-    to: Email address of the receiver.
-    subject: The subject of the email message.
-    message_text: The text of the email message.
-
-  Returns:
-    An object containing a base64url encoded email object.
-  """
   message = MIMEText(message_text)
   message['to'] = to
   message['from'] = sender
@@ -92,17 +77,6 @@ def create_message(message_text):
   return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 def send_message(service, user_id, message):
-  """Send an email message.
-
-  Args:
-    service: Authorized Gmail API service instance.
-    user_id: User's email address. The special value "me"
-    can be used to indicate the authenticated user.
-    message: Message to be sent.
-
-  Returns:
-    Sent Message.
-  """
   try:
     message = (service.users().messages().send(userId=user_id, body=message)
                .execute())
@@ -117,6 +91,8 @@ def send_email(json):
     serv = connect_to_api()
     msj = create_message(message_text)
     send_message(serv, "me", msj)
+  else:
+    print('No existen tweets nuevos para enviar')
 
 if __name__ == "__main__":
   send_email()
