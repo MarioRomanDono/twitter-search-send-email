@@ -22,8 +22,8 @@ search_url = "https://api.twitter.com/2/tweets/search/recent"
 
 bearer_token = os.getenv("BEARER_TOKEN")
 query = os.getenv("QUERY")
-n_days = int(os.getenv("DAYS"))
-date = (datetime.datetime.today() - datetime.timedelta(days=n_days)).strftime('%Y-%m-%dT%H:%M:%SZ')
+n_hours = int(os.getenv("HOURS"))
+date = (datetime.datetime.today() - datetime.timedelta(hours=n_hours)).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 query_params = {'query': query, 'start_time': date}
 
