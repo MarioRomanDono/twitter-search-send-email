@@ -14,6 +14,12 @@
 
 from twitter_search import twitter_search
 from send_email import send_email
+from send_telegram_message import send_telegram_message
+import os
 
 search_result = twitter_search()
-send_email(search_result)
+
+if (os.getenv("EMAIL_OPTION")):
+    send_email(search_result)
+else:
+    send_telegram_message(search_result)
