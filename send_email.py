@@ -23,11 +23,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 
-sender = os.getenv("FROM_EMAIL")
-to = os.getenv("TO_EMAIL")
-subject = os.getenv("SUBJECT_EMAIL")
-creds_var = json.loads(base64.b64decode(os.getenv("GMAIL_CREDENTIALS")))
-token_var = json.loads(base64.b64decode(os.getenv("GMAIL_TOKEN")))
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
@@ -47,6 +42,9 @@ def create_message_text(json_object):
 
 
 def connect_to_api():
+    creds_var = json.loads(base64.b64decode(os.getenv("GMAIL_CREDENTIALS")))
+    token_var = json.loads(base64.b64decode(os.getenv("GMAIL_TOKEN")))
+    
     creds = None
     if (os.path.exists("token.json")):
       creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -71,9 +69,9 @@ def connect_to_api():
 
 def create_message(message_text):
   message = MIMEText(message_text)
-  message['to'] = to
-  message['from'] = sender
-  message['subject'] = subject
+  message['to'] = os.getenv("TO_EMAIL")
+  message['from'] = os.getenv("FROM_EMAIL")
+  message['subject'] = os.getenv("SUBJECT_EMAIL")
   return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 def send_message(service, user_id, message):
