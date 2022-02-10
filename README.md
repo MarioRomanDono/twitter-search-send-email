@@ -31,7 +31,7 @@ El objetivo de este proyecto es, principalmente, prácticar el uso de Python y e
     - Si no se han establecido las variables `GMAIL_CREDENTIALS` o `GMAIL_TOKEN`, se deben encontrar los ficheros `token.json` y/o `credentials.json` en la raíz del repositorio.
 
 ## Instalación y uso
-1. Clonar el repositorio: `git clone https://github.com/MarioRomanDono/twitter-search-send-email.git && cd twitter-search-send-email/`
+1. Clonar el repositorio: `git clone https://github.com/MarioRomanDono/twitter-search-send-telegram-or-email.git && cd twitter-search-send-telegram-or-email/`
 2. En el caso de querer usar el envío a través de email, instalar los paquetes requeridos: `pip install -r requirements.txt`
 3. Establecer las variables de entorno y ejecutar el programa: `python3 main.py`
 
